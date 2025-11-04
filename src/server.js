@@ -7,6 +7,7 @@ import { connectDB } from "./libs/db.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import AppError from "./errors/AppError.js";
 import authRoute from "./routes/authRouter.js";
+import friendRouters from "./routes/friendRoute.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -21,6 +22,8 @@ const PORT = process.env.PORT || 4000;
 app.use("/api/auth", authRoute);
 
 app.use("/api/users", requireAuth, userRoutes);
+
+app.use("/api/friends", requireAuth, friendRouters);
 
 app.use((req, res, next) => next(new AppError("Route not found", 404)));
 
