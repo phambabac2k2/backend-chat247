@@ -10,7 +10,7 @@ import crypto from "crypto";
 const ACCESS_TOKEN_TTL = "30m"; // thuờng là dưới 15m
 const REFRESH_TOKEN_TTL = 14 * 24 * 60 * 60 * 1000; // 14 ngày
 export const signUp = asyncHandler(async (req, res) => {
-  const { username, password, email, firstName, lastName } = req.body;
+  const { firstName, lastName, username, email, password } = req.body;
 
   if (!username || !password || !email || !firstName || !lastName) {
     throw new AppError(
@@ -75,36 +75,35 @@ export const signIn = asyncHandler(async (req, res) => {
   res.status(200).json({
     accessToken,
     message: "Đăng nhập thành công",
-  })
-
-})
+  });
+});
 
 export const signOut = asyncHandler(async (req, res) => {
-    const refreshToken = req.cookies.refreshToken;
-    if(refreshToken){
-      await Session.deleteOne({refreshToken})
+  const refreshToken = req.cookies.refreshToken;
+  if (refreshToken) {
+    await Session.deleteOne({ refreshToken });
 
-      res.clearCookie("refreshToken")
-    }
+    res.clearCookie("refreshToken");
+  }
 
-    res.sendStatus(204)
-})
+  res.sendStatus(204);
+});
 
 export const refreshAccessToken = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
-  if(!refreshToken){
-    throw new AppError("Token không tồn tại", 401)
+  if (!refreshToken) {
+    throw new AppError("Token không tồn tại", 401);
   }
 
-  const session = await Session.findOne({refreshToken})
+  const session = await Session.findOne({ refreshToken });
 
-  if(!session){
-    throw new AppError("Token không hợp lê hoặc đã hết hạn", 401)
+  if (!session) {
+    throw new AppError("Token không hợp lê hoặc đã hết hạn", 401);
   }
 
-  if(session.expiresAt < Date.now()){
-    throw new AppError("Token đã hết hạn", 401)
+  if (session.expiresAt < Date.now()) {
+    throw new AppError("Token đã hết hạn", 401);
   }
 
   const accessToken = jwt.sign(
@@ -113,7 +112,5 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     { expiresIn: ACCESS_TOKEN_TTL }
   );
 
-  return res.status(200).json({accessToken})
-
-
-})
+  return res.status(200).json({ accessToken });
+});
