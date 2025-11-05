@@ -61,7 +61,32 @@ export const createConversation = asyncHandler(async (req, res) => {
 });
 
 export const getConversations = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const conversations = await Conversation.find({
+      "participants.userId": userId,
+    })
+      .sort({ lastMessageAt: -1, updatedAt: -1 })
+      .populate([
+        { path: "participants.userId", select: "displayName avatarUrl" },
+        { path: "seenBy", select: "displayName avatarUrl" },
+        { path: "lastMessage.senderId", select: "displayName avatarUrl" },
+      ]);
     
+      const formatted = conversations.map((conv) => {
+        const participants = (conv.participants || []).map((p) => ({
+            _id: p.userId?._id,
+            displayName: p.userId?.displayName,
+            avatarUrl: p.userId?.avatarUrl ?? null,
+            joinedAt: p.joinedAt ?? null,
+        }));
+        return {
+            ...conv.toObject(),
+            unreadCounts: conv.unreadCounts || {},
+            participants,
+        }
+      })
+      res.status(200).json({conversations: formatted});
 });
 
 export const getMessages = asyncHandler(async (req, res) => {});
