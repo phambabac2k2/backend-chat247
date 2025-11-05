@@ -10,6 +10,7 @@ import authRoute from "./routes/authRouter.js";
 import friendRouters from "./routes/friendRoute.js";
 import cookieParser from "cookie-parser";
 import conversationRouter from "./routes/conversationRoute.js";
+import messageRouter from "./routes/messageRouter.js";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ app.use("/api/users", requireAuth, userRoutes);
 
 app.use("/api/friends", requireAuth, friendRouters);
 app.use("/api/conversations", requireAuth, conversationRouter);
-
+app.use("/api/messages", requireAuth, messageRouter);
 app.use((req, res, next) => next(new AppError("Route not found", 404)));
 
 app.use(errorHandler);
