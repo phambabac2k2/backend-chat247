@@ -127,11 +127,39 @@ export const getFriendRequests =  asyncHandler(async (req, res) => {
 })
 
 export const getFriends =  asyncHandler(async (req, res) => {
+    const userId = req.user._id;
 
+    const friends = await Friend.find({
+      $or: [{ userA: userId }, { userB: userId }],
+    })
+      .populate({
+        path: "userA userB",
+        select: "_id displayName avatarUrl",
+      });
+
+    res.status(200).json(friends);
 })
 
 export const getFriend =  asyncHandler(async (req, res) => {
+    const { friendId } = req.params;
+    const userId = req.user._id;
 
+    const friend = await Friend.findOne({
+      $or: [
+        { userA: userId, userB: friendId },
+        { userA: friendId, userB: userId }
+      ]
+    })
+      .populate({
+        path: "userA userB",
+        select: "_id displayName avatarUrl",
+      });
+
+    if (!friend) {
+      throw new AppError("Không tìm thấy bạn bè", 404);
+    }
+
+    res.status(200).json(friend);
 })
 
 export const deleteFriend = asyncHandler(async (req, res) => {

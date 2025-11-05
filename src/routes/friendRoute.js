@@ -16,7 +16,7 @@ router.post("/friend-request", sendFriendRequest);
 router.post("/friend-request/:requestId/accept", acceptFriendRequest);
 router.post("/friend-request/:requestId/reject", rejectFriendRequest);
 router.get("/friend-request", getFriendRequests);
-router.get("/friends", getFriends);
+router.get("/", getFriends);
 router.get("/:friendId", getFriend);
 router.delete("/:friendId", deleteFriend);
 
