@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import AppError from "../errors/AppError.js";
 import Conversation from "../models/Conversation.js";
-
+import Message from "../models/Message.js";
 export const createConversation = asyncHandler(async (req, res) => {
   const { type, name, memberIds } = req.body;
 
@@ -89,4 +89,27 @@ export const getConversations = asyncHandler(async (req, res) => {
       res.status(200).json({conversations: formatted});
 });
 
-export const getMessages = asyncHandler(async (req, res) => {});
+export const getMessages = asyncHandler(async (req, res) => {
+    const { conversationId } = req.params;
+    const {limt=50, cursor} = req.query;
+
+    const query = { conversationId };
+    if (cursor) {
+        query.createdAt = { $lt: new Date(cursor) };
+    }
+
+    let messages =await Message.find(query)
+    .sort({ createdAt: -1 })
+    .limit(Number(limt) + 1)
+
+    let nextCursor = null;
+
+    if (messages.length > Number(limt)) {
+        const nextMessage = messages[messages.length -1];
+        nextCursor = nextMessage.createdAt.toISOString();
+        messages.pop()
+    }
+    messages= messages.reverse();
+    res.status(200).json({messages, nextCursor});
+
+});
